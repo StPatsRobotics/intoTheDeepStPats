@@ -10,7 +10,7 @@ public class servoTest extends LinearOpMode{
     public Servo servo;
 
 
-    double servoPos = 0.025;
+    double servoPos = 0.2;
 
     public void runOpMode() throws InterruptedException {
         servo = hardwareMap.get(Servo.class, "servo");
@@ -27,7 +27,7 @@ public class servoTest extends LinearOpMode{
             }
             if (gamepad1.right_bumper) {
                 servoPos -= 0.0005;
-                servoPos = Math.max(servoPos, 0.025);
+                servoPos = Math.max(servoPos, 0.13);
             }
             servo.setPosition(servoPos);
 

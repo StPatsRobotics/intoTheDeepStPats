@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp (name = "teleopMove")
 public class teleopMove extends LinearOpMode{
@@ -22,9 +23,9 @@ public class teleopMove extends LinearOpMode{
         motorBL = hardwareMap.get(DcMotor.class, "motorBR");
 
         motorBL.setDirection(DcMotor.Direction.FORWARD);
-        motorFL.setDirection(DcMotor.Direction.FORWARD);
+        motorFL.setDirection(DcMotor.Direction.REVERSE);
         motorBR.setDirection(DcMotor.Direction.REVERSE);
-        motorFR.setDirection(DcMotor.Direction.REVERSE);
+        motorFR.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setPower(0);
         motorFR.setPower(0);
         motorBL.setPower(0);
@@ -42,14 +43,15 @@ public class teleopMove extends LinearOpMode{
         while (opModeIsActive()) {
 
             double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);
-            double right = -speedMode * Math.pow(gamepad1.left_stick_x, 3);
-            double turn = -speedMode * Math.pow(gamepad1.right_stick_x, 3);
+            double right = -speedMode * Math.pow(gamepad1.right_stick_x, 3);
+            double turn = -speedMode * Math.pow(gamepad1.left_stick_x, 3);
             double leftFrontPower = forward + right + turn;
             double leftBackPower = forward - right + turn;
             double rightFrontPower = forward - right - turn;
             double rightBackPower = forward + right - turn;
             double[] powers = {leftFrontPower, leftBackPower, rightFrontPower, rightBackPower};
             boolean needToScale = false;
+            boolean buttonA = gamepad1.a;
             for (double power : powers) {
                 if (Math.abs(power) > 1) {
                     needToScale = true;
@@ -75,6 +77,12 @@ public class teleopMove extends LinearOpMode{
                     stop = false;
                     break;
                 }
+            }
+            if (buttonA) {
+                leftFrontPower = leftFrontPower/3;
+                leftBackPower = leftBackPower/3;
+                rightFrontPower = rightFrontPower/3;
+                rightBackPower = rightBackPower/3;
             }
             if (stop) {
                 leftFrontPower = 0;

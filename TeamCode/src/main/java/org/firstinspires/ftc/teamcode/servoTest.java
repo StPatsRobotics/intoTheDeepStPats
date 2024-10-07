@@ -36,8 +36,5 @@ public class servoTest extends LinearOpMode{
             telemetry.update();
         }
 
-//        telemetry.addData("Stuff", "Stuff");
-//        telemetry.update();
-
     }
 }

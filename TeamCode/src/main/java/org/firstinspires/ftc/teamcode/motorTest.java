@@ -12,7 +12,7 @@ public class motorTest extends LinearOpMode{
     double motorPower = 0;
 
     public void runOpMode() throws InterruptedException {
-        motor = hardwareMap.get(DcMotor.class, "testMotor");
+        motor = hardwareMap.get(DcMotor.class, "motorArm");
 
         motor.setDirection(DcMotor.Direction.FORWARD);
         motor.setPower(0);

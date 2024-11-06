@@ -29,6 +29,13 @@ public class teleopMove extends LinearOpMode{
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
         servoClaw = hardwareMap.get(Servo.class, "servoClaw");
 
+        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         motorBL.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setDirection(DcMotor.Direction.REVERSE);
         motorBR.setDirection(DcMotor.Direction.REVERSE);

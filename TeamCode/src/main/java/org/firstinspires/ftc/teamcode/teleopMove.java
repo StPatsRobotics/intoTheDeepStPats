@@ -19,6 +19,8 @@ public class teleopMove extends LinearOpMode{
 
     public double speedMode = 1;
     public double servoPos = 0.2;
+    public int armPos = 0;
+    boolean gamepad2ButtonA = false;
 
     public void runOpMode() throws InterruptedException {
         motorFL = hardwareMap.get(DcMotor.class, "motorFL");
@@ -28,13 +30,6 @@ public class teleopMove extends LinearOpMode{
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
         servoClaw = hardwareMap.get(Servo.class, "servoClaw");
-
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         motorBL.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setDirection(DcMotor.Direction.REVERSE);
@@ -50,7 +45,6 @@ public class teleopMove extends LinearOpMode{
         motorBR.setPower(0);
         motorArm.setPower(0);
         motorSlide.setPower(0);
-        servoClaw.setPosition(servoPos);
 
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -59,14 +53,23 @@ public class teleopMove extends LinearOpMode{
         motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        servoPos = servoClaw.getPosition();
 
         waitForStart();
         while (opModeIsActive()) {
 
-            double armPower = (gamepad1.right_trigger - gamepad1.left_trigger);
-            double slidePower = ((gamepad1.right_bumper ? 1 : 0) - (gamepad1.left_bumper ? 1 : 0));
+            armPos += (int) (5 * (gamepad2.right_trigger - gamepad2.left_trigger));
+            double slidePower = ((gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0));
 
             double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);
             double right = -speedMode * Math.pow(gamepad1.right_stick_x, 3);
@@ -77,7 +80,9 @@ public class teleopMove extends LinearOpMode{
             double rightBackPower = forward + right - turn;
             double[] powers = {leftFrontPower, leftBackPower, rightFrontPower, rightBackPower};
             boolean needToScale = false;
-            boolean buttonA = gamepad1.a;
+            boolean prevGamepad2ButtonA = gamepad2ButtonA;
+            gamepad2ButtonA = gamepad2.a;
+            boolean gamepad1ButtonA = gamepad1.a;
             for (double power : powers) {
                 if (Math.abs(power) > 1) {
                     needToScale = true;
@@ -104,7 +109,7 @@ public class teleopMove extends LinearOpMode{
                     break;
                 }
             }
-            if (buttonA) {
+            if (gamepad1ButtonA) {
                 leftFrontPower = leftFrontPower/3;
                 leftBackPower = leftBackPower/3;
                 rightFrontPower = rightFrontPower/3;
@@ -117,11 +122,13 @@ public class teleopMove extends LinearOpMode{
                 rightBackPower = 0;
             }
 
-            if (gamepad1.dpad_up) {
-                servoPos -= 0.0005;
+            if (gamepad2.dpad_down) {
+                servoPos -= 0.001;
+                servoPos = Math.max(servoPos, 0);
             }
-            if (gamepad1.dpad_down) {
-                servoPos += 0.0005;
+            if (gamepad2.dpad_up) {
+                servoPos += 0.001;
+                servoPos = Math.min(servoPos, 1);
             }
             servoClaw.setPosition(servoPos);
 
@@ -130,8 +137,30 @@ public class teleopMove extends LinearOpMode{
             motorFR.setPower(rightFrontPower);
             motorBR.setPower(rightBackPower);
 
-            motorArm.setPower(armPower);
+            if (gamepad2ButtonA & !prevGamepad2ButtonA) {
+                armPos = motorArm.getCurrentPosition();
+            }
+            if (gamepad2ButtonA) {
+                motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorArm.setTargetPosition(armPos);
+                motorArm.setPower(0.5);
+            } else {
+                motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motorArm.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
+            }
             motorSlide.setPower(slidePower);
+
+            telemetry.addData("Servo Position", servoClaw.getPosition());
+            telemetry.addData("Arm Mode", motorArm.getMode());
+            telemetry.addData("Arm Position", motorArm.getCurrentPosition());
+            telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
+            telemetry.addData("Gamepad2 Button A", gamepad2ButtonA);
+            telemetry.addData("Prev Gamepad2 Button A", prevGamepad2ButtonA);
+            telemetry.addData("FR Motor", motorFR.getCurrentPosition());
+            telemetry.addData("FL Motor", motorFL.getCurrentPosition());
+            telemetry.addData("BR Motor", motorBR.getCurrentPosition());
+            telemetry.addData("BL Motor", motorBL.getCurrentPosition());
+            telemetry.update();
         }
 
     }

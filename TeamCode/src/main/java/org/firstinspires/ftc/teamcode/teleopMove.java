@@ -132,6 +132,9 @@ public class teleopMove extends LinearOpMode{
                 rightFrontPower = 0;
                 rightBackPower = 0;
             }
+            if (gamepad2.x) {
+                slidePower = slidePower/3;
+            }
 
             if (gamepad2.dpad_down) {
                 servoPos -= 0.002;

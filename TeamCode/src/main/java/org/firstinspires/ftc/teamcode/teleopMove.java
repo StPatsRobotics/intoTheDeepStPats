@@ -137,11 +137,11 @@ public class teleopMove extends LinearOpMode{
             }
 
             if (gamepad2.dpad_down) {
-                servoPos -= 0.002;
+                servoPos -= 0.005;
                 servoPos = Math.max(servoPos, 0.5);
             }
             if (gamepad2.dpad_up) {
-                servoPos += 0.002;
+                servoPos += 0.005;
                 servoPos = Math.min(servoPos, 1);
             }
             if (gamepad2.dpad_right) {

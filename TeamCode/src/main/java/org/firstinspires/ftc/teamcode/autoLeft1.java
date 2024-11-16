@@ -3,12 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="autoRight")
-public class autoRight extends LinearOpMode {
+@Autonomous(name="autoLeft1")
+public class autoLeft1 extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor motorFL;
@@ -22,7 +21,7 @@ public class autoRight extends LinearOpMode {
     private ElapsedTime     runtime = new ElapsedTime();
 
     static final double     COUNTS_PER_INCH         = 44.62;
-    static final double     DRIVE_SPEED             = 0.3;
+    static final double     DRIVE_SPEED             = 0.4;
     static final double     TURN_SPEED              = 0.3;
 
     @Override
@@ -31,8 +30,8 @@ public class autoRight extends LinearOpMode {
         // Initialize the drive system variables.
         motorFL = hardwareMap.get(DcMotor.class, "motorFL");
         motorFR = hardwareMap.get(DcMotor.class, "motorFR");
-        motorBR = hardwareMap.get(DcMotor.class, "motorBL");
-        motorBL = hardwareMap.get(DcMotor.class, "motorBR");
+        motorBR = hardwareMap.get(DcMotor.class, "motorBR");
+        motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
         servoClaw = hardwareMap.get(Servo.class, "servoClaw");
@@ -40,9 +39,9 @@ public class autoRight extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        motorBL.setDirection(DcMotor.Direction.REVERSE);
+        motorBL.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setDirection(DcMotor.Direction.FORWARD);
-        motorBR.setDirection(DcMotor.Direction.FORWARD);
+        motorBR.setDirection(DcMotor.Direction.REVERSE);
         motorFR.setDirection(DcMotor.Direction.REVERSE);
         motorArm.setDirection(DcMotor.Direction.FORWARD);
         motorSlide.setDirection(DcMotor.Direction.FORWARD);
@@ -74,7 +73,10 @@ public class autoRight extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  40,  40, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  5,  5, 2);
+        encoderDrive(TURN_SPEED, -20, 51, 4);
+        encoderDrive(DRIVE_SPEED, 22, 22, 4);
+        encoderDrive(DRIVE_SPEED, -110, -110, 10);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

@@ -18,7 +18,7 @@ public class teleopMove extends LinearOpMode{
 
 
     public double speedMode = 1;
-    public double servoPos = 0.2;
+    public double servoPos = 0.5;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
 
@@ -63,13 +63,24 @@ public class teleopMove extends LinearOpMode{
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        servoPos = servoClaw.getPosition();
 
         waitForStart();
+
+        servoClaw.setPosition(servoPos);
+
         while (opModeIsActive()) {
 
             armPos += (int) (5 * (gamepad2.right_trigger - gamepad2.left_trigger));
             double slidePower = ((gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0));
+            if (motorSlide.getCurrentPosition() < 20) {
+                slidePower = Math.max(slidePower, 0);
+            }
+            if (motorSlide.getCurrentPosition() > 2000 && !(motorArm.getCurrentPosition() > 620)) {
+                slidePower = Math.min(slidePower, 0);
+            }
+            if (motorSlide.getCurrentPosition() > 3000) {
+                slidePower = Math.min(slidePower, 0);
+            }
 
             double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);
             double right = -speedMode * Math.pow(gamepad1.right_stick_x, 3);
@@ -123,12 +134,18 @@ public class teleopMove extends LinearOpMode{
             }
 
             if (gamepad2.dpad_down) {
-                servoPos -= 0.001;
-                servoPos = Math.max(servoPos, 0);
+                servoPos -= 0.002;
+                servoPos = Math.max(servoPos, 0.5);
             }
             if (gamepad2.dpad_up) {
-                servoPos += 0.001;
+                servoPos += 0.002;
                 servoPos = Math.min(servoPos, 1);
+            }
+            if (gamepad2.dpad_right) {
+                servoPos = 1;
+            }
+            if (gamepad2.dpad_left) {
+                servoPos = 0.5;
             }
             servoClaw.setPosition(servoPos);
 

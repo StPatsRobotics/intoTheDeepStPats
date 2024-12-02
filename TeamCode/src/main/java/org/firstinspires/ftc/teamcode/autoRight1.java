@@ -20,9 +20,10 @@ public class autoRight1 extends LinearOpMode {
 
     private ElapsedTime     runtime = new ElapsedTime();
 
-    static final double     COUNTS_PER_INCH         = 44.62;
-    static final double     DRIVE_SPEED             = 0.4;
-    static final double     TURN_SPEED              = 0.3;
+    static final double COUNTS_PER_INCH = 44.62;
+    static final double DRIVE_SPEED = 0.4;
+    static  final double ARM_SPEED = 0.4;
+    static final double SLIDE_SPEED = 0.4;
 
     @Override
     public void runOpMode() {
@@ -73,7 +74,20 @@ public class autoRight1 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        tankDrive(DRIVE_SPEED,  29,  29, 2);
+//        24 in
+//        arm - 400
+//        slide - 2000
+//        arm - 450
+//        slide - 0
+//        arm - 0
+        servoClaw.setPosition(0.48);
+        tankDrive(DRIVE_SPEED,  24,  24, 2);
+        setArmPos(ARM_SPEED, 400, 2, true);
+        setSlidePos(SLIDE_SPEED, 2000, 3);
+        setArmPos(ARM_SPEED, 450, 1, true);
+        setSlidePos(SLIDE_SPEED, 0, 3);
+        tankDrive(DRIVE_SPEED, -5, -5, 1);
+        setArmPos(ARM_SPEED, 50, 2, false);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -120,12 +134,7 @@ public class autoRight1 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
 
                 // Display it for the driver.
@@ -181,12 +190,7 @@ public class autoRight1 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
 
                 // Display it for the driver.
@@ -206,6 +210,72 @@ public class autoRight1 extends LinearOpMode {
             motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sleep(250);   // optional pause after each move.
+        }
+    }
+
+    public void setArmPos(double speed, int armPos, double timeoutS, boolean holdPos) {
+
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            motorArm.setTargetPosition(armPos);
+
+            // Turn On RUN_TO_POSITION
+            motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            motorArm.setPower(Math.abs(speed));
+
+
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorArm.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Running to",  " %7d", armPos);
+                telemetry.addData("Currently at",  " at %7d", motorArm.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Turn off RUN_TO_POSITION and stop motion
+            if (!holdPos) {
+                motorArm.setPower(0);
+                motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+
+            sleep(250);   // optional pause after each move.
+        }
+    }
+
+    public void setSlidePos(double speed, int slidePos, double timeoutS) {
+
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            motorSlide.setTargetPosition(slidePos);
+
+            // Turn On RUN_TO_POSITION
+            motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            motorSlide.setPower(Math.abs(speed));
+
+
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorSlide.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Running to",  " %7d", slidePos);
+                telemetry.addData("Currently at",  " at %7d", motorSlide.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            motorSlide.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             sleep(250);   // optional pause after each move.
         }

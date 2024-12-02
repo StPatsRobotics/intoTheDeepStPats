@@ -18,7 +18,7 @@ public class teleopMove extends LinearOpMode{
 
 
     public double speedMode = 1;
-    public double servoPos = 0.45;
+    public double servoPos = 0.48;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
 
@@ -93,7 +93,6 @@ public class teleopMove extends LinearOpMode{
             boolean needToScale = false;
             boolean prevGamepad2ButtonA = gamepad2ButtonA;
             gamepad2ButtonA = gamepad2.a;
-            boolean gamepad1ButtonA = gamepad1.a;
             for (double power : powers) {
                 if (Math.abs(power) > 1) {
                     needToScale = true;
@@ -120,7 +119,7 @@ public class teleopMove extends LinearOpMode{
                     break;
                 }
             }
-            if (gamepad1ButtonA) {
+            if (gamepad1.right_trigger > 0.2 || gamepad1.left_trigger > 0.2) {
                 leftFrontPower = leftFrontPower/3;
                 leftBackPower = leftBackPower/3;
                 rightFrontPower = rightFrontPower/3;
@@ -138,7 +137,7 @@ public class teleopMove extends LinearOpMode{
 
             if (gamepad2.dpad_down) {
                 servoPos -= 0.005;
-                servoPos = Math.max(servoPos, 0.45);
+                servoPos = Math.max(servoPos, 0.48);
             }
             if (gamepad2.dpad_up) {
                 servoPos += 0.005;
@@ -148,7 +147,7 @@ public class teleopMove extends LinearOpMode{
                 servoPos = 1;
             }
             if (gamepad2.dpad_left) {
-                servoPos = 0.45;
+                servoPos = 0.48;
             }
             servoClaw.setPosition(servoPos);
 

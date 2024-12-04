@@ -72,14 +72,6 @@ public class autoRight1 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-//        24 in
-//        arm - 400
-//        slide - 2000
-//        arm - 450
-//        slide - 0
-//        arm - 0
         servoClaw.setPosition(0.48);
         tankDrive(DRIVE_SPEED,  24,  24, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
@@ -88,6 +80,14 @@ public class autoRight1 extends LinearOpMode {
         setSlidePos(SLIDE_SPEED, 0, 3);
         tankDrive(DRIVE_SPEED, -5, -5, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
+        sideDrive(0.25, 32, 2);
+        tankDrive(0.25, 35, 35, 2);
+        sideDrive(0.25, 11, 1);
+        tankDrive(0.25, -49, -49, 3);
+        tankDrive(0.25, 49, 49, 3);
+        sideDrive(0.25, 11, 1);
+        tankDrive(0.25, -49, -49, 3);
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

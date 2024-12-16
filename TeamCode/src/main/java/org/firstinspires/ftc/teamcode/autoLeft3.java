@@ -73,9 +73,7 @@ public class autoLeft3 extends LinearOpMode {
         waitForStart();
 
         servoClaw.setPosition(0.48);
-        tankDrive(0.3, 4.5, 4.5, 1);
-        sideDrive(DRIVE_SPEED, 28, 2);
-        tankDrive(DRIVE_SPEED,  20,  20, 2);
+        tankDrive(DRIVE_SPEED,  24,  24, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2000, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
@@ -84,7 +82,10 @@ public class autoLeft3 extends LinearOpMode {
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, -34, 2);
         tankDrive(DRIVE_SPEED, 30, 30, 2);
-        tankDrive(DRIVE_SPEED, -22, 22, 1);
+        sideDrive(DRIVE_SPEED, -24, 2);
+        tankDrive(DRIVE_SPEED, -50, -50, 2);
+        tankDrive(DRIVE_SPEED, 50, 50, 2);
+        tankDrive(DRIVE_SPEED, -23, 23, 1);
         setArmPos(0.25, 980, 2, false);
         int currentArmPosition = motorArm.getCurrentPosition() - 5;
         motorFL.setPower(-0.2);

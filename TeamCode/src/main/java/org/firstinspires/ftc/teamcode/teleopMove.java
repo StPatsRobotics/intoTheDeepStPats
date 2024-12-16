@@ -53,6 +53,13 @@ public class teleopMove extends LinearOpMode{
         motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -72,14 +79,18 @@ public class teleopMove extends LinearOpMode{
 
             armPos += (int) (5 * (gamepad2.right_trigger - gamepad2.left_trigger));
             double slidePower = ((gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0));
-            if (motorSlide.getCurrentPosition() < 20) {
+            if (motorSlide.getCurrentPosition() < 20 && !(gamepad2.left_stick_button && gamepad2.left_stick_y > 0.6)) {
                 slidePower = Math.max(slidePower, 0);
             }
-            if (motorSlide.getCurrentPosition() > 2000 && !(motorArm.getCurrentPosition() > 620)) {
+            if (motorSlide.getCurrentPosition() > 2000 && !(motorArm.getCurrentPosition() > 620) && !(gamepad2.left_stick_button && gamepad2.left_stick_y > 0.6)) {
                 slidePower = Math.min(slidePower, 0);
             }
-            if (motorSlide.getCurrentPosition() > 3000) {
+            if (motorSlide.getCurrentPosition() > 3000 && !(gamepad2.left_stick_button && gamepad2.left_stick_y > 0.6)) {
                 slidePower = Math.min(slidePower, 0);
+            }
+            if (gamepad2.left_stick_button && gamepad2.left_stick_y < 0.6) {
+                motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
             double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);

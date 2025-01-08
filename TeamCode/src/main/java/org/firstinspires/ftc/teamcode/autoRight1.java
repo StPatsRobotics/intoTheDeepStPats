@@ -21,9 +21,15 @@ public class autoRight1 extends LinearOpMode {
     private ElapsedTime     runtime = new ElapsedTime();
 
     static final double COUNTS_PER_INCH = 44.62;
-    static final double DRIVE_SPEED = 0.4;
+    static final double DRIVE_SPEED = 0.5;
     static  final double ARM_SPEED = 0.4;
-    static final double SLIDE_SPEED = 0.4;
+    static final double SLIDE_SPEED = 0.5;
+    static final double SLOW_SPEED = 0.4;
+
+    private int idealPosMotorFL = 0;
+    private int idealPosMotorFR = 0;
+    private int idealPosMotorBL = 0;
+    private int idealPosMotorBR = 0;
 
     @Override
     public void runOpMode() {
@@ -73,20 +79,23 @@ public class autoRight1 extends LinearOpMode {
         waitForStart();
 
         servoClaw.setPosition(0.48);
-        tankDrive(DRIVE_SPEED,  24,  24, 2);
+        tankDrive(SLOW_SPEED,  23,  23, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
-        setSlidePos(SLIDE_SPEED, 2000, 3);
+        setSlidePos(SLIDE_SPEED, 2200, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
-        setSlidePos(SLIDE_SPEED, 0, 3);
-        tankDrive(DRIVE_SPEED, -5, -5, 1);
+        setSlidePos(SLIDE_SPEED, 0, 2);
+        tankDrive(SLOW_SPEED, -5, -5, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
-        sideDrive(0.25, 32, 2);
-        tankDrive(0.25, 35, 35, 2);
-        sideDrive(0.25, 11, 1);
-        tankDrive(0.25, -49, -49, 3);
-        tankDrive(0.25, 49, 49, 3);
-        sideDrive(0.25, 11, 1);
-        tankDrive(0.25, -49, -49, 3);
+        sideDrive(DRIVE_SPEED, 32, 2);
+        tankDrive(DRIVE_SPEED, 35, 35, 2);
+        sideDrive(DRIVE_SPEED, 10.5, 1);
+        tankDrive(DRIVE_SPEED, -47, -47, 3);
+        tankDrive(DRIVE_SPEED, 47, 47, 3);
+        sideDrive(DRIVE_SPEED, 10.5, 1);
+        tankDrive(DRIVE_SPEED, -47, -47, 3);
+        tankDrive(DRIVE_SPEED, 20, 20, 2);
+        tankDrive(SLOW_SPEED, -41, 41, 2);
+        tankDrive(DRIVE_SPEED, 15, 15, 2);
 
 
         telemetry.addData("Path", "Complete");
@@ -112,10 +121,10 @@ public class autoRight1 extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newFLtarget = motorFL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newBLtarget = motorBL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newFRtarget = motorFR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newBRtarget = motorBR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newFLtarget = idealPosMotorFL += (int)(leftInches * COUNTS_PER_INCH);
+            newBLtarget = idealPosMotorBL += (int)(leftInches * COUNTS_PER_INCH);
+            newFRtarget = idealPosMotorFR += (int)(rightInches * COUNTS_PER_INCH);
+            newBRtarget = idealPosMotorBR += (int)(rightInches * COUNTS_PER_INCH);
             motorFL.setTargetPosition(newFLtarget);
             motorBL.setTargetPosition(newBLtarget);
             motorFR.setTargetPosition(newFRtarget);
@@ -149,13 +158,36 @@ public class autoRight1 extends LinearOpMode {
             motorFR.setPower(0);
             motorBR.setPower(0);
 
+            sleep(100);
+
+
+            motorBL.setPower(0.2);
+            motorFL.setPower(0.2);
+            motorFR.setPower(0.2);
+            motorBR.setPower(0.2);
+
+
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newFLtarget, newBLtarget, newFRtarget, newBRtarget);
+                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d", motorFL.getCurrentPosition(), motorBL.getCurrentPosition(), motorFR.getCurrentPosition(), motorBR.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            motorBL.setPower(0);
+            motorFL.setPower(0);
+            motorFR.setPower(0);
+            motorBR.setPower(0);
+
             // Turn off RUN_TO_POSITION
             motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(150);   // optional pause after each move.
         }
     }
     public void sideDrive(double speed, double sideDistance, double timeoutS) {
@@ -168,10 +200,10 @@ public class autoRight1 extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newFLtarget = motorFL.getCurrentPosition() + (int)(sideDistance * COUNTS_PER_INCH);
-            newBLtarget = motorBL.getCurrentPosition() - (int)(sideDistance * COUNTS_PER_INCH);
-            newFRtarget = motorFR.getCurrentPosition() - (int)(sideDistance * COUNTS_PER_INCH);
-            newBRtarget = motorBR.getCurrentPosition() + (int)(sideDistance * COUNTS_PER_INCH);
+            newFLtarget = idealPosMotorFL += (int)(sideDistance * COUNTS_PER_INCH);
+            newBLtarget = idealPosMotorBL -= (int)(sideDistance * COUNTS_PER_INCH);
+            newFRtarget = idealPosMotorFR -= (int)(sideDistance * COUNTS_PER_INCH);
+            newBRtarget = idealPosMotorBR += (int)(sideDistance * COUNTS_PER_INCH);
             motorFL.setTargetPosition(newFLtarget);
             motorBL.setTargetPosition(newBLtarget);
             motorFR.setTargetPosition(newFRtarget);

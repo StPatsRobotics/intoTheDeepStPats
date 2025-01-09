@@ -80,11 +80,11 @@ public class autoLeft3 extends LinearOpMode {
         setSlidePos(SLIDE_SPEED, 0, 3);
         tankDrive(DRIVE_SPEED, -5, -5, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
-        sideDrive(DRIVE_SPEED, -34, 2);
+        sideDrive(DRIVE_SPEED, -33, 2);
         tankDrive(DRIVE_SPEED, 30, 30, 2);
         sideDrive(DRIVE_SPEED, -24, 2);
-        tankDrive(DRIVE_SPEED, -50, -50, 2);
-        tankDrive(DRIVE_SPEED, 50, 50, 2);
+        tankDrive(DRIVE_SPEED, -47, -47, 2);
+        tankDrive(DRIVE_SPEED, 43, 43, 2);
         tankDrive(DRIVE_SPEED, -23, 23, 1);
         setArmPos(0.25, 980, 2, false);
         int currentArmPosition = motorArm.getCurrentPosition() - 5;
@@ -143,6 +143,22 @@ public class autoLeft3 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
+
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
+
+                // Display it for the driver.
+                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newFLtarget, newBLtarget, newFRtarget, newBRtarget);
+                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d", motorFL.getCurrentPosition(), motorBL.getCurrentPosition(), motorFR.getCurrentPosition(), motorBR.getCurrentPosition());
+                telemetry.update();
+            }
+
+            sleep(200);
+
+            // Go to the position slower
+            motorBL.setPower(0.1);
+            motorFL.setPower(0.1);
+            motorFR.setPower(0.1);
+            motorBR.setPower(0.1);
 
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
 

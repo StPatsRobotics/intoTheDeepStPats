@@ -88,14 +88,14 @@ public class autoRight1 extends LinearOpMode {
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, 32, 2);
         tankDrive(DRIVE_SPEED, 35, 35, 2);
-        sideDrive(DRIVE_SPEED, 10.5, 1);
+        sideDrive(DRIVE_SPEED, 11, 1);
         tankDrive(DRIVE_SPEED, -47, -47, 3);
         tankDrive(DRIVE_SPEED, 47, 47, 3);
         sideDrive(DRIVE_SPEED, 10.5, 1);
         tankDrive(DRIVE_SPEED, -47, -47, 3);
         tankDrive(DRIVE_SPEED, 20, 20, 2);
         tankDrive(SLOW_SPEED, -41, 41, 2);
-        tankDrive(DRIVE_SPEED, 15, 15, 2);
+        tankDrive(DRIVE_SPEED, 16, 16, 2);
 
 
         telemetry.addData("Path", "Complete");

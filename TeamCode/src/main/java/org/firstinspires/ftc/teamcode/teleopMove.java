@@ -92,6 +92,10 @@ public class teleopMove extends LinearOpMode{
                 motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
+            if (gamepad2.right_stick_button && gamepad2.right_stick_y < 0.6) {
+                motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
 
             double forward = speedMode * Math.pow(gamepad1.left_stick_y, 3);
             double right = -speedMode * Math.pow(gamepad1.right_stick_x, 3);

@@ -21,6 +21,9 @@ public class teleopMove extends LinearOpMode{
     public double servoPos = 0.48;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
+    boolean gamepad2ButtonY = false;
+
+    boolean gamepad2ButtonYTriggered = false;
 
     public void runOpMode() throws InterruptedException {
         motorFL = hardwareMap.get(DcMotor.class, "motorFL");
@@ -135,10 +138,10 @@ public class teleopMove extends LinearOpMode{
                 }
             }
             if (gamepad1.right_trigger > 0.2 || gamepad1.left_trigger > 0.2) {
-                leftFrontPower = leftFrontPower/3;
-                leftBackPower = leftBackPower/3;
-                rightFrontPower = rightFrontPower/3;
-                rightBackPower = rightBackPower/3;
+                leftFrontPower = leftFrontPower/(3 + ((gamepad1.right_trigger > 0.2 && gamepad1.left_trigger > 0.2) ? 3 : 0));
+                leftBackPower = leftBackPower/(3 + ((gamepad1.right_trigger > 0.2 && gamepad1.left_trigger > 0.2) ? 3 : 0));
+                rightFrontPower = rightFrontPower/(3 + ((gamepad1.right_trigger > 0.2 && gamepad1.left_trigger > 0.2) ? 3 : 0));
+                rightBackPower = rightBackPower/(3 + ((gamepad1.right_trigger > 0.2 && gamepad1.left_trigger > 0.2) ? 3 : 0));
             }
             if (stop) {
                 leftFrontPower = 0;
@@ -171,6 +174,13 @@ public class teleopMove extends LinearOpMode{
             motorFR.setPower(rightFrontPower);
             motorBR.setPower(rightBackPower);
 
+            if (gamepad2.y) {
+                motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorSlide.setTargetPosition(motorSlide.getCurrentPosition());
+                motorSlide.setPower(1);
+                gamepad2ButtonYTriggered = true;
+            }
+
             if (gamepad2ButtonA & !prevGamepad2ButtonA) {
                 armPos = motorArm.getCurrentPosition();
             }
@@ -182,11 +192,14 @@ public class teleopMove extends LinearOpMode{
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 motorArm.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
             }
-            motorSlide.setPower(slidePower);
+            if (!gamepad2ButtonYTriggered) {
+                motorSlide.setPower(slidePower);
+            }
 
             telemetry.addData("Servo Position", servoClaw.getPosition());
             telemetry.addData("Arm Mode", motorArm.getMode());
             telemetry.addData("Arm Position", motorArm.getCurrentPosition());
+            telemetry.addData("Arm Mode", motorSlide.getMode());
             telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
             telemetry.addData("Gamepad2 Button A", gamepad2ButtonA);
             telemetry.addData("Prev Gamepad2 Button A", prevGamepad2ButtonA);

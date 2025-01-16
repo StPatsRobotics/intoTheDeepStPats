@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.opencv.core.Mat;
 
 @Autonomous(name="autoRight2")
 public class autoRight2 extends LinearOpMode {
@@ -36,6 +37,8 @@ public class autoRight2 extends LinearOpMode {
     private int idealPosMotorFR = 0;
     private int idealPosMotorBL = 0;
     private int idealPosMotorBR = 0;
+    YawPitchRollAngles robotOrientation;
+    double yaw;
 
     @Override
     public void runOpMode() {
@@ -88,32 +91,21 @@ public class autoRight2 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        while (opModeIsActive()) {
-            servoClaw.setPosition(0.48);
-
-            YawPitchRollAngles robotOrientation;
-            robotOrientation = imu.getRobotYawPitchRollAngles();
-            double yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
-
-            telemetry.addData("yaw", yaw);
-            telemetry.update();
-        }
-
-
-        tankDrive(SLOW_SPEED,  23,  23, 2);
+        servoClaw.setPosition(0.48);
+        tankDrive(SLOW_SPEED,  23,  23, 0, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
         setSlidePos(SLIDE_SPEED, 0, 2);
-        tankDrive(SLOW_SPEED, -5, -5, 1);
+        tankDrive(SLOW_SPEED, -5, -5, 0, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, 32, 2);
-        tankDrive(DRIVE_SPEED, 35, 35, 2);
+        tankDrive(DRIVE_SPEED, 35, 35, 0, 2);
         sideDrive(DRIVE_SPEED, 11, 1);
-        tankDrive(DRIVE_SPEED, -47, -47, 3);
-        tankDrive(DRIVE_SPEED, 20, 20, 2);
-        tankDrive(SLOW_SPEED, -41, 41, 2);
-        tankDrive(DRIVE_SPEED, 9.5, 9.5, 2);
+        tankDrive(DRIVE_SPEED, -47, -47, 0, 3);
+        tankDrive(DRIVE_SPEED, 20, 20, 0, 2);
+        turnToAngle(SLOW_SPEED, 180, 2);
+        tankDrive(DRIVE_SPEED, 9.5, 9.5, 0, 2);
         servoClaw.setPosition(0.6);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sleep(1000);
@@ -122,7 +114,8 @@ public class autoRight2 extends LinearOpMode {
         servoClaw.setPosition(0.48);
         sleep(250);
         setSlidePos(SLIDE_SPEED, 0, 1);
-        sideDrive(DRIVE_SPEED, 50, 2);
+        sideDrive(DRIVE_SPEED, 52, 2);
+        turnToAngle(SLOW_SPEED, 0, 2);
 
 
         telemetry.addData("Path", "Complete");
@@ -138,7 +131,7 @@ public class autoRight2 extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the OpMode running.
      */
-    public void tankDrive(double speed, double leftInches, double rightInches, double timeoutS) {
+    public void tankDrive(double speed, double leftInches, double rightInches, double angle, double timeoutS) {
         int newFLtarget;
         int newBLtarget;
         int newFRtarget;
@@ -172,11 +165,19 @@ public class autoRight2 extends LinearOpMode {
 
 
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
+                if (!Double.isNaN(angle)) {
+                    robotOrientation = imu.getRobotYawPitchRollAngles();
+                    yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+                    double yawError = angle - yaw;
 
-                // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newFLtarget, newBLtarget, newFRtarget, newBRtarget);
-                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d", motorFL.getCurrentPosition(), motorBL.getCurrentPosition(), motorFR.getCurrentPosition(), motorBR.getCurrentPosition());
-                telemetry.update();
+                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
+                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
+                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
+                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
+
+                    telemetry.addData("yawError", yawError);
+                    telemetry.update();
+                }
             }
 
             // Stop all motion;
@@ -338,5 +339,36 @@ public class autoRight2 extends LinearOpMode {
 
             sleep(250);   // optional pause after each move.
         }
+    }
+
+    public void turnToAngle(double speed, double angle, double timeoutS) {
+        runtime.reset();
+
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+        double yawDifference = angle - yaw;
+
+        while (opModeIsActive() && (runtime.seconds() < timeoutS) && (Math.abs(yawDifference) > 10)) {
+            motorBL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
+            motorFL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
+            motorFR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
+            motorBR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
+
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+            yawDifference = angle - yaw;
+
+            telemetry.addData("yaw", yaw);
+            telemetry.addData("yawDifference", yawDifference);
+            telemetry.addData("exit condition", !(Math.abs(yawDifference) > 10));
+            telemetry.update();
+        }
+
+        motorBL.setPower(0);
+        motorFL.setPower(0);
+        motorFR.setPower(0);
+        motorBR.setPower(0);
+
+        sleep(150);
     }
 }

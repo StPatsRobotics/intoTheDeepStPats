@@ -18,7 +18,7 @@ public class teleopMove extends LinearOpMode{
 
 
     public double speedMode = 1;
-    public double servoPos = 0.48;
+    public double servoPos = 0.465;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
     boolean gamepad2ButtonY = false;
@@ -155,7 +155,7 @@ public class teleopMove extends LinearOpMode{
 
             if (gamepad2.dpad_down) {
                 servoPos -= 0.005;
-                servoPos = Math.max(servoPos, 0.48);
+                servoPos = Math.max(servoPos, 0.465);
             }
             if (gamepad2.dpad_up) {
                 servoPos += 0.005;
@@ -165,7 +165,7 @@ public class teleopMove extends LinearOpMode{
                 servoPos = 1;
             }
             if (gamepad2.dpad_left) {
-                servoPos = 0.48;
+                servoPos = 0.465;
             }
             servoClaw.setPosition(servoPos);
 

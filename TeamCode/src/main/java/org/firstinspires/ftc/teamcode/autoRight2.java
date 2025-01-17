@@ -91,7 +91,7 @@ public class autoRight2 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        servoClaw.setPosition(0.48);
+        servoClaw.setPosition(0.465);
         tankDrive(SLOW_SPEED,  23,  23, 0, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
@@ -105,13 +105,16 @@ public class autoRight2 extends LinearOpMode {
         tankDrive(DRIVE_SPEED, -47, -47, 0, 3);
         tankDrive(DRIVE_SPEED, 20, 20, 0, 2);
         turnToAngle(SLOW_SPEED, 180, 2);
-        tankDrive(DRIVE_SPEED, 9.5, 9.5, 0, 2);
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
+        sleep(100000);
+        tankDrive(DRIVE_SPEED, 9.5, 9.5, 180, 2);
         servoClaw.setPosition(0.6);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sleep(1000);
         setSlidePos(SLIDE_SPEED, 525, 1);
         sleep(250);
-        servoClaw.setPosition(0.48);
+        servoClaw.setPosition(0.465);
         sleep(250);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sideDrive(DRIVE_SPEED, 52, 2);
@@ -163,12 +166,13 @@ public class autoRight2 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
+            double targetAngle = (angle + 180) % 360;
 
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
                 if (!Double.isNaN(angle)) {
                     robotOrientation = imu.getRobotYawPitchRollAngles();
-                    yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
-                    double yawError = angle - yaw;
+                    yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
+                    double yawError = targetAngle - yaw;
 
                     motorBL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
                     motorFL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
@@ -177,6 +181,7 @@ public class autoRight2 extends LinearOpMode {
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();
+                    ermWhatTheSigma();
                 }
             }
 
@@ -274,7 +279,6 @@ public class autoRight2 extends LinearOpMode {
             sleep(250);   // optional pause after each move.
         }
     }
-
     public void setArmPos(double speed, int armPos, double timeoutS, boolean holdPos) {
 
         if (opModeIsActive()) {
@@ -307,7 +311,6 @@ public class autoRight2 extends LinearOpMode {
             sleep(250);   // optional pause after each move.
         }
     }
-
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
 
         if (opModeIsActive()) {
@@ -340,13 +343,13 @@ public class autoRight2 extends LinearOpMode {
             sleep(250);   // optional pause after each move.
         }
     }
-
     public void turnToAngle(double speed, double angle, double timeoutS) {
         runtime.reset();
 
         robotOrientation = imu.getRobotYawPitchRollAngles();
-        yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
-        double yawDifference = angle - yaw;
+        double targetAngle = (angle + 180) % 360;
+        yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
+        double yawDifference = targetAngle - yaw;
 
         while (opModeIsActive() && (runtime.seconds() < timeoutS) && (Math.abs(yawDifference) > 10)) {
             motorBL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
@@ -355,12 +358,12 @@ public class autoRight2 extends LinearOpMode {
             motorBR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
 
             robotOrientation = imu.getRobotYawPitchRollAngles();
-            yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
-            yawDifference = angle - yaw;
+            yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
+            yawDifference = targetAngle - yaw;
 
             telemetry.addData("yaw", yaw);
+            telemetry.addData("targetAngle", targetAngle);
             telemetry.addData("yawDifference", yawDifference);
-            telemetry.addData("exit condition", !(Math.abs(yawDifference) > 10));
             telemetry.update();
         }
 
@@ -370,5 +373,9 @@ public class autoRight2 extends LinearOpMode {
         motorBR.setPower(0);
 
         sleep(150);
+    }
+    public void ermWhatTheSigma() {
+        telemetry.addData("Erm What The Sigma: ", "Erm What The Sigma");
+        telemetry.update();
     }
 }

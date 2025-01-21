@@ -89,6 +89,8 @@ public class autoRight2 extends LinearOpMode {
         motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (driver presses START)
+        telemetry.addData("stuff", -180 % 360);
+        telemetry.update();
         waitForStart();
 
         servoClaw.setPosition(0.465);
@@ -105,10 +107,8 @@ public class autoRight2 extends LinearOpMode {
         tankDrive(DRIVE_SPEED, -47, -47, 0, 3);
         tankDrive(DRIVE_SPEED, 20, 20, 0, 2);
         turnToAngle(SLOW_SPEED, 180, 2);
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
-        sleep(100000);
-        tankDrive(DRIVE_SPEED, 9.5, 9.5, 180, 2);
+        sleep(3000);
+        tankDrive(DRIVE_SPEED, 10, 10, 180, 2);
         servoClaw.setPosition(0.6);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sleep(1000);
@@ -119,6 +119,15 @@ public class autoRight2 extends LinearOpMode {
         setSlidePos(SLIDE_SPEED, 0, 1);
         sideDrive(DRIVE_SPEED, 52, 2);
         turnToAngle(SLOW_SPEED, 0, 2);
+        tankDrive(SLOW_SPEED,  10,  10, 0, 2);
+        setArmPos(ARM_SPEED, 400, 2, true);
+        setSlidePos(SLIDE_SPEED, 2200, 3);
+        setArmPos(ARM_SPEED, 440, 1, true);
+        setSlidePos(SLIDE_SPEED, 900, 2);
+        servoClaw.setPosition(1);
+        sleep(500);
+        setSlidePos(SLIDE_SPEED, 0, 2);
+        setArmPos(ARM_SPEED, 50, 2, false);
 
 
         telemetry.addData("Path", "Complete");
@@ -166,22 +175,19 @@ public class autoRight2 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
-            double targetAngle = (angle + 180) % 360;
-
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
                 if (!Double.isNaN(angle)) {
                     robotOrientation = imu.getRobotYawPitchRollAngles();
-                    yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
-                    double yawError = targetAngle - yaw;
+                    yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+                    double yawError = Math.abs(((540 + yaw - angle) % 360) - 180);
 
-                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
-                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
-                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
-                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / 10, speed));
+                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
+                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
+                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
+                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();
-                    ermWhatTheSigma();
                 }
             }
 
@@ -344,6 +350,10 @@ public class autoRight2 extends LinearOpMode {
         }
     }
     public void turnToAngle(double speed, double angle, double timeoutS) {
+        int startPositionBL = motorBL.getCurrentPosition();
+        int startPositionFL = motorFL.getCurrentPosition();
+        int startPositionFR = motorFR.getCurrentPosition();
+        int startPositionBR = motorBR.getCurrentPosition();
         runtime.reset();
 
         robotOrientation = imu.getRobotYawPitchRollAngles();
@@ -372,10 +382,11 @@ public class autoRight2 extends LinearOpMode {
         motorFR.setPower(0);
         motorBR.setPower(0);
 
+        idealPosMotorBL += motorBL.getCurrentPosition() - startPositionBL;
+        idealPosMotorFL += motorFL.getCurrentPosition() - startPositionFL;
+        idealPosMotorFR += motorFR.getCurrentPosition() - startPositionFR;
+        idealPosMotorBR += motorBR.getCurrentPosition() - startPositionBR;
+
         sleep(150);
-    }
-    public void ermWhatTheSigma() {
-        telemetry.addData("Erm What The Sigma: ", "Erm What The Sigma");
-        telemetry.update();
     }
 }

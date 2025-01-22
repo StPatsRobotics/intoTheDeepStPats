@@ -28,10 +28,11 @@ public class autoRight2 extends LinearOpMode {
     private ElapsedTime     runtime = new ElapsedTime();
 
     static final double COUNTS_PER_INCH = 44.62;
-    static final double DRIVE_SPEED = 0.5;
+    static final double DRIVE_SPEED = 0.6;
     static  final double ARM_SPEED = 0.4;
     static final double SLIDE_SPEED = 0.5;
     static final double SLOW_SPEED = 0.4;
+    static final int YAW_PRECISION = 400;
 
     private int idealPosMotorFL = 0;
     private int idealPosMotorFR = 0;
@@ -89,28 +90,33 @@ public class autoRight2 extends LinearOpMode {
         motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (driver presses START)
-        telemetry.addData("stuff", -180 % 360);
+        telemetry.addData("stuff", 0);
         telemetry.update();
         waitForStart();
 
         servoClaw.setPosition(0.465);
-        tankDrive(SLOW_SPEED,  23,  23, 0, 2);
+        tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
         setSlidePos(SLIDE_SPEED, 0, 2);
-        tankDrive(SLOW_SPEED, -5, -5, 0, 1);
+        tankDrive(SLOW_SPEED, -5, -5, 0, YAW_PRECISION, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, 32, 2);
-        tankDrive(DRIVE_SPEED, 35, 35, 0, 2);
+        tankDrive(DRIVE_SPEED, 35, 35, 0, YAW_PRECISION, 2);
         sideDrive(DRIVE_SPEED, 11, 1);
-        tankDrive(DRIVE_SPEED, -47, -47, 0, 3);
-        tankDrive(DRIVE_SPEED, 20, 20, 0, 2);
+        tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 3);
+        tankDrive(DRIVE_SPEED, 20, 20, 0, YAW_PRECISION, 2);
         turnToAngle(SLOW_SPEED, 180, 2);
-        sleep(3000);
-        tankDrive(DRIVE_SPEED, 10, 10, 180, 2);
-        servoClaw.setPosition(0.6);
         setSlidePos(SLIDE_SPEED, 0, 1);
+        servoClaw.setPosition(0.6);
+        telemetry.addData("BL difference", motorBL.getCurrentPosition() - idealPosMotorBL);
+        telemetry.addData("FL difference", motorFL.getCurrentPosition() - idealPosMotorFL);
+        telemetry.addData("FR difference", motorFR.getCurrentPosition() - idealPosMotorFR);
+        telemetry.addData("BR difference", motorBR.getCurrentPosition() - idealPosMotorBR);
+        telemetry.update();
+        sleep(1000);
+        tankDrive(DRIVE_SPEED, 10, 10, 180, 100, 2);
         sleep(1000);
         setSlidePos(SLIDE_SPEED, 525, 1);
         sleep(250);
@@ -119,15 +125,15 @@ public class autoRight2 extends LinearOpMode {
         setSlidePos(SLIDE_SPEED, 0, 1);
         sideDrive(DRIVE_SPEED, 52, 2);
         turnToAngle(SLOW_SPEED, 0, 2);
-        tankDrive(SLOW_SPEED,  10,  10, 0, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
-        setSlidePos(SLIDE_SPEED, 2200, 3);
-        setArmPos(ARM_SPEED, 440, 1, true);
-        setSlidePos(SLIDE_SPEED, 900, 2);
+        tankDrive(SLOW_SPEED,  10,  10, 0, YAW_PRECISION, 2);
+        setSlidePos(SLIDE_SPEED, 800, 3);
+        setArmPos(ARM_SPEED, 500, 1, true);
+        setSlidePos(SLIDE_SPEED, 0, 2);
         servoClaw.setPosition(1);
         sleep(500);
-        setSlidePos(SLIDE_SPEED, 0, 2);
         setArmPos(ARM_SPEED, 50, 2, false);
+        setSlidePos(SLIDE_SPEED, 0, 1);
 
 
         telemetry.addData("Path", "Complete");
@@ -143,7 +149,7 @@ public class autoRight2 extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the OpMode running.
      */
-    public void tankDrive(double speed, double leftInches, double rightInches, double angle, double timeoutS) {
+    public void tankDrive(double speed, double leftInches, double rightInches, double angle, int precision, double timeoutS) {
         int newFLtarget;
         int newBLtarget;
         int newFRtarget;
@@ -181,10 +187,10 @@ public class autoRight2 extends LinearOpMode {
                     yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
                     double yawError = Math.abs(((540 + yaw - angle) % 360) - 180);
 
-                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
-                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
-                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
-                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / 500, speed));
+                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();
@@ -197,7 +203,7 @@ public class autoRight2 extends LinearOpMode {
             motorFR.setPower(0);
             motorBR.setPower(0);
 
-            sleep(100);
+            sleep(50);
 
 
             motorBL.setPower(0.2);
@@ -226,7 +232,7 @@ public class autoRight2 extends LinearOpMode {
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(150);   // optional pause after each move.
+            sleep(50);   // optional pause after each move.
         }
     }
     public void sideDrive(double speed, double sideDistance, double timeoutS) {
@@ -282,7 +288,7 @@ public class autoRight2 extends LinearOpMode {
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
     }
     public void setArmPos(double speed, int armPos, double timeoutS, boolean holdPos) {
@@ -314,7 +320,7 @@ public class autoRight2 extends LinearOpMode {
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
     }
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
@@ -346,7 +352,7 @@ public class autoRight2 extends LinearOpMode {
             // Turn off RUN_TO_POSITION
             motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
     }
     public void turnToAngle(double speed, double angle, double timeoutS) {
@@ -382,11 +388,11 @@ public class autoRight2 extends LinearOpMode {
         motorFR.setPower(0);
         motorBR.setPower(0);
 
+        sleep(100);
+
         idealPosMotorBL += motorBL.getCurrentPosition() - startPositionBL;
         idealPosMotorFL += motorFL.getCurrentPosition() - startPositionFL;
         idealPosMotorFR += motorFR.getCurrentPosition() - startPositionFR;
         idealPosMotorBR += motorBR.getCurrentPosition() - startPositionBR;
-
-        sleep(150);
     }
 }

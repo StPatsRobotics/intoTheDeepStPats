@@ -3,8 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
 @Autonomous(name="autoLeft3")
 public class autoLeft3 extends LinearOpMode {
@@ -17,6 +22,7 @@ public class autoLeft3 extends LinearOpMode {
     private DcMotor motorArm;
     private DcMotor motorSlide;
     private Servo servoClaw;
+    private IMU imu;
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -24,6 +30,14 @@ public class autoLeft3 extends LinearOpMode {
     static final double DRIVE_SPEED = 0.4;
     static  final double ARM_SPEED = 0.4;
     static final double SLIDE_SPEED = 0.4;
+    static final int YAW_PRECISION = 200;
+
+    private int idealPosMotorFL = 0;
+    private int idealPosMotorFR = 0;
+    private int idealPosMotorBL = 0;
+    private int idealPosMotorBR = 0;
+    YawPitchRollAngles robotOrientation;
+    double yaw;
 
     @Override
     public void runOpMode() {
@@ -36,10 +50,13 @@ public class autoLeft3 extends LinearOpMode {
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
         servoClaw = hardwareMap.get(Servo.class, "servoClaw");
+        imu = hardwareMap.get(IMU.class, "imu");
 
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
+
         motorBL.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setDirection(DcMotor.Direction.FORWARD);
         motorBR.setDirection(DcMotor.Direction.REVERSE);
@@ -61,6 +78,7 @@ public class autoLeft3 extends LinearOpMode {
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        imu.resetYaw();
 
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -73,19 +91,19 @@ public class autoLeft3 extends LinearOpMode {
         waitForStart();
 
         servoClaw.setPosition(0.01);
-        tankDrive(DRIVE_SPEED,  24,  24, 2);
+        tankDrive(DRIVE_SPEED,  24,  24, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2000, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
         setSlidePos(SLIDE_SPEED, 0, 3);
-        tankDrive(DRIVE_SPEED, -5, -5, 1);
+        tankDrive(DRIVE_SPEED, -5, -5, 0, YAW_PRECISION, 1);
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, -33, 2);
-        tankDrive(DRIVE_SPEED, 30, 30, 2);
+        tankDrive(DRIVE_SPEED, 30, 30, 0, YAW_PRECISION, 2);
         sideDrive(DRIVE_SPEED, -24, 2);
-        tankDrive(DRIVE_SPEED, -47, -47, 2);
-        tankDrive(DRIVE_SPEED, 43, 43, 2);
-        tankDrive(DRIVE_SPEED, -23, 23, 1);
+        tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 2);
+        tankDrive(DRIVE_SPEED, 50, 50, 0, YAW_PRECISION, 2);
+        turnToAngle(0.2, 90, 2);
         setArmPos(0.25, 980, 2, false);
         int currentArmPosition = motorArm.getCurrentPosition() - 5;
         motorFL.setPower(-0.2);
@@ -111,7 +129,7 @@ public class autoLeft3 extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the OpMode running.
      */
-    public void tankDrive(double speed, double leftInches, double rightInches, double timeoutS) {
+    public void tankDrive(double speed, double leftInches, double rightInches, double angle, int precision, double timeoutS) {
         int newFLtarget;
         int newBLtarget;
         int newFRtarget;
@@ -121,10 +139,10 @@ public class autoLeft3 extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newFLtarget = motorFL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newBLtarget = motorBL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newFRtarget = motorFR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newBRtarget = motorBR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newFLtarget = idealPosMotorFL += (int)(leftInches * COUNTS_PER_INCH);
+            newBLtarget = idealPosMotorBL += (int)(leftInches * COUNTS_PER_INCH);
+            newFRtarget = idealPosMotorFR += (int)(rightInches * COUNTS_PER_INCH);
+            newBRtarget = idealPosMotorBR += (int)(rightInches * COUNTS_PER_INCH);
             motorFL.setTargetPosition(newFLtarget);
             motorBL.setTargetPosition(newBLtarget);
             motorFR.setTargetPosition(newFRtarget);
@@ -143,22 +161,36 @@ public class autoLeft3 extends LinearOpMode {
             motorFR.setPower(Math.abs(speed));
             motorBR.setPower(Math.abs(speed));
 
-
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
+                if (!Double.isNaN(angle)) {
+                    robotOrientation = imu.getRobotYawPitchRollAngles();
+                    yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+                    double yawError = Math.abs(((540 + yaw - angle) % 360) - 180);
 
-                // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newFLtarget, newBLtarget, newFRtarget, newBRtarget);
-                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d", motorFL.getCurrentPosition(), motorBL.getCurrentPosition(), motorFR.getCurrentPosition(), motorBR.getCurrentPosition());
-                telemetry.update();
+                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+
+                    telemetry.addData("yawError", yawError);
+                    telemetry.update();
+                }
             }
 
-            sleep(200);
+            // Stop all motion;
+            motorBL.setPower(0);
+            motorFL.setPower(0);
+            motorFR.setPower(0);
+            motorBR.setPower(0);
 
-            // Go to the position slower
-            motorBL.setPower(0.1);
-            motorFL.setPower(0.1);
-            motorFR.setPower(0.1);
-            motorBR.setPower(0.1);
+            sleep(50);
+
+
+            motorBL.setPower(0.2);
+            motorFL.setPower(0.2);
+            motorFR.setPower(0.2);
+            motorBR.setPower(0.2);
+
 
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (motorFL.isBusy() && motorBL.isBusy() && motorFR.isBusy() && motorBR.isBusy())) {
 
@@ -180,7 +212,7 @@ public class autoLeft3 extends LinearOpMode {
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(50);   // optional pause after each move.
         }
     }
     public void sideDrive(double speed, double sideDistance, double timeoutS) {
@@ -193,10 +225,10 @@ public class autoLeft3 extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newFLtarget = motorFL.getCurrentPosition() + (int)(sideDistance * COUNTS_PER_INCH);
-            newBLtarget = motorBL.getCurrentPosition() - (int)(sideDistance * COUNTS_PER_INCH);
-            newFRtarget = motorFR.getCurrentPosition() - (int)(sideDistance * COUNTS_PER_INCH);
-            newBRtarget = motorBR.getCurrentPosition() + (int)(sideDistance * COUNTS_PER_INCH);
+            newFLtarget = idealPosMotorFL += (int)(sideDistance * COUNTS_PER_INCH);
+            newBLtarget = idealPosMotorBL -= (int)(sideDistance * COUNTS_PER_INCH);
+            newFRtarget = idealPosMotorFR -= (int)(sideDistance * COUNTS_PER_INCH);
+            newBRtarget = idealPosMotorBR += (int)(sideDistance * COUNTS_PER_INCH);
             motorFL.setTargetPosition(newFLtarget);
             motorBL.setTargetPosition(newBLtarget);
             motorFR.setTargetPosition(newFRtarget);
@@ -236,10 +268,9 @@ public class autoLeft3 extends LinearOpMode {
             motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
     }
-
     public void setArmPos(double speed, int armPos, double timeoutS, boolean holdPos) {
 
         if (opModeIsActive()) {
@@ -269,10 +300,9 @@ public class autoLeft3 extends LinearOpMode {
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
     }
-
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
 
         if (opModeIsActive()) {
@@ -302,7 +332,45 @@ public class autoLeft3 extends LinearOpMode {
             // Turn off RUN_TO_POSITION
             motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move.
+            sleep(100);   // optional pause after each move.
         }
+    }
+    public void turnToAngle(double speed, double angle, double timeoutS) {
+        int startPositionBL = motorBL.getCurrentPosition();
+        int startPositionFL = motorFL.getCurrentPosition();
+        int startPositionFR = motorFR.getCurrentPosition();
+        int startPositionBR = motorBR.getCurrentPosition();
+        runtime.reset();
+
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+        double yawDifference = Math.abs(((540 + yaw - angle) % 360) - 180);
+
+        while (opModeIsActive() && (runtime.seconds() < timeoutS) && (Math.abs(yawDifference) > 10)) {
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+            yawDifference = Math.abs(((540 + yaw - angle) % 360) - 180);
+
+            motorBL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
+            motorFL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
+            motorFR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
+            motorBR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
+
+            telemetry.addData("yaw", yaw);
+            telemetry.addData("yawDifference", yawDifference);
+            telemetry.update();
+        }
+
+        motorBL.setPower(0);
+        motorFL.setPower(0);
+        motorFR.setPower(0);
+        motorBR.setPower(0);
+
+        sleep(100);
+
+        idealPosMotorBL += motorBL.getCurrentPosition() - startPositionBL;
+        idealPosMotorFL += motorFL.getCurrentPosition() - startPositionFL;
+        idealPosMotorFR += motorFR.getCurrentPosition() - startPositionFR;
+        idealPosMotorBR += motorBR.getCurrentPosition() - startPositionBR;
     }
 }

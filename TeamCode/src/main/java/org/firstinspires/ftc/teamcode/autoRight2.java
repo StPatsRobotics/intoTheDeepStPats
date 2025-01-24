@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,9 +7,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.opencv.core.Mat;
 
 @Autonomous(name="autoRight2")
 public class autoRight2 extends LinearOpMode {
@@ -32,7 +31,7 @@ public class autoRight2 extends LinearOpMode {
     static  final double ARM_SPEED = 0.4;
     static final double SLIDE_SPEED = 0.5;
     static final double SLOW_SPEED = 0.4;
-    static final int YAW_PRECISION = 400;
+    static final int YAW_PRECISION = 200;
 
     private int idealPosMotorFL = 0;
     private int idealPosMotorFR = 0;
@@ -363,22 +362,20 @@ public class autoRight2 extends LinearOpMode {
         runtime.reset();
 
         robotOrientation = imu.getRobotYawPitchRollAngles();
-        double targetAngle = (angle + 180) % 360;
-        yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
-        double yawDifference = targetAngle - yaw;
+        yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+        double yawDifference = Math.abs(((540 + yaw - angle) % 360) - 180);
 
         while (opModeIsActive() && (runtime.seconds() < timeoutS) && (Math.abs(yawDifference) > 10)) {
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+            yawDifference = Math.abs(((540 + yaw - angle) % 360) - 180);
+
             motorBL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
             motorFL.setPower((yawDifference / Math.abs(yawDifference)) * -Math.abs(speed));
             motorFR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
             motorBR.setPower((yawDifference / Math.abs(yawDifference)) * Math.abs(speed));
 
-            robotOrientation = imu.getRobotYawPitchRollAngles();
-            yaw = (robotOrientation.getYaw(AngleUnit.DEGREES) + 180) % 360;
-            yawDifference = targetAngle - yaw;
-
             telemetry.addData("yaw", yaw);
-            telemetry.addData("targetAngle", targetAngle);
             telemetry.addData("yawDifference", yawDifference);
             telemetry.update();
         }

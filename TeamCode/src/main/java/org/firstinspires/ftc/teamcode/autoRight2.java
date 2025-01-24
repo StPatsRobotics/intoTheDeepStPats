@@ -93,7 +93,7 @@ public class autoRight2 extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        servoClaw.setPosition(0.01);
+        servoClaw.setPosition(0);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
@@ -119,7 +119,7 @@ public class autoRight2 extends LinearOpMode {
         sleep(1000);
         setSlidePos(SLIDE_SPEED, 525, 1);
         sleep(250);
-        servoClaw.setPosition(0.01);
+        servoClaw.setPosition(0);
         sleep(250);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sideDrive(DRIVE_SPEED, 52, 2);
@@ -127,7 +127,7 @@ public class autoRight2 extends LinearOpMode {
         setArmPos(ARM_SPEED, 400, 2, true);
         tankDrive(SLOW_SPEED,  10,  10, 0, YAW_PRECISION, 2);
         setSlidePos(SLIDE_SPEED, 800, 3);
-        setArmPos(ARM_SPEED, 500, 1, true);
+        setArmPos(ARM_SPEED, 530, 1, true);
         setSlidePos(SLIDE_SPEED, 0, 2);
         servoClaw.setPosition(0.545);
         sleep(500);

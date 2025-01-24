@@ -94,7 +94,7 @@ public class autoRight2 extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        servoClaw.setPosition(0.465);
+        servoClaw.setPosition(0.01);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
@@ -109,7 +109,7 @@ public class autoRight2 extends LinearOpMode {
         tankDrive(DRIVE_SPEED, 20, 20, 0, YAW_PRECISION, 2);
         turnToAngle(SLOW_SPEED, 180, 2);
         setSlidePos(SLIDE_SPEED, 0, 1);
-        servoClaw.setPosition(0.6);
+        servoClaw.setPosition(0.14);
         telemetry.addData("BL difference", motorBL.getCurrentPosition() - idealPosMotorBL);
         telemetry.addData("FL difference", motorFL.getCurrentPosition() - idealPosMotorFL);
         telemetry.addData("FR difference", motorFR.getCurrentPosition() - idealPosMotorFR);
@@ -120,7 +120,7 @@ public class autoRight2 extends LinearOpMode {
         sleep(1000);
         setSlidePos(SLIDE_SPEED, 525, 1);
         sleep(250);
-        servoClaw.setPosition(0.465);
+        servoClaw.setPosition(0.01);
         sleep(250);
         setSlidePos(SLIDE_SPEED, 0, 1);
         sideDrive(DRIVE_SPEED, 52, 2);
@@ -130,7 +130,7 @@ public class autoRight2 extends LinearOpMode {
         setSlidePos(SLIDE_SPEED, 800, 3);
         setArmPos(ARM_SPEED, 500, 1, true);
         setSlidePos(SLIDE_SPEED, 0, 2);
-        servoClaw.setPosition(1);
+        servoClaw.setPosition(0.545);
         sleep(500);
         setArmPos(ARM_SPEED, 50, 2, false);
         setSlidePos(SLIDE_SPEED, 0, 1);

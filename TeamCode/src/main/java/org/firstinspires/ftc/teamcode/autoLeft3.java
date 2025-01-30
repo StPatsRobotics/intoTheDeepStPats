@@ -100,11 +100,12 @@ public class autoLeft3 extends LinearOpMode {
         setArmPos(ARM_SPEED, 50, 2, false);
         sideDrive(DRIVE_SPEED, -33, 2);
         tankDrive(DRIVE_SPEED, 30, 30, 0, YAW_PRECISION, 2);
-        sideDrive(DRIVE_SPEED, -24, 2);
+        sideDrive(DRIVE_SPEED, -26, 2);
         tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 2);
         tankDrive(DRIVE_SPEED, 50, 50, 0, YAW_PRECISION, 2);
-        turnToAngle(0.2, 90, 2);
+        turnToAngle(0.2, 100, 2);
         setArmPos(0.25, 980, 2, false);
+        sleep(500);
         int currentArmPosition = motorArm.getCurrentPosition() - 5;
         motorFL.setPower(-0.2);
         motorBL.setPower(-0.2);

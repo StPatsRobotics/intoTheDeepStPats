@@ -34,7 +34,7 @@ public class autoLeft2 extends LinearOpMode {
         motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoClaw");
+        servoClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.

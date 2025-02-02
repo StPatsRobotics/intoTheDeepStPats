@@ -50,7 +50,7 @@ public class autoRight2 extends LinearOpMode {
         motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoClaw");
+        servoClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;

@@ -13,15 +13,18 @@ public class teleopMove extends LinearOpMode{
     public DcMotor motorBL;
     public DcMotor motorArm;
     public DcMotor motorSlide;
-    public Servo servoClaw;
-    //    public DcMotor[] motors = new DcMotor[4];
+    public Servo servoSampleClaw;
+    public Servo servoSpecimenClaw;
 
 
     public double speedMode = 1;
-    public double servoPos = 0;
+    public double servoSamplePos = 0;
+    public double servoSpecimenPos = 0.5;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
     boolean gamepad2ButtonY = false;
+    boolean gamepad2ButtonB = false;
+    boolean controlledServo = false;
 
     boolean gamepad2ButtonYTriggered = false;
 
@@ -32,7 +35,8 @@ public class teleopMove extends LinearOpMode{
         motorBL = hardwareMap.get(DcMotor.class, "motorBR");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoClaw");
+        servoSampleClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
+        servoSpecimenClaw = hardwareMap.get(Servo.class, "servoSpecimenClaw");
 
         motorBL.setDirection(DcMotor.Direction.FORWARD);
         motorFL.setDirection(DcMotor.Direction.REVERSE);
@@ -40,7 +44,8 @@ public class teleopMove extends LinearOpMode{
         motorFR.setDirection(DcMotor.Direction.FORWARD);
         motorArm.setDirection(DcMotor.Direction.FORWARD);
         motorSlide.setDirection(DcMotor.Direction.FORWARD);
-        servoClaw.setDirection(Servo.Direction.FORWARD);
+        servoSampleClaw.setDirection(Servo.Direction.FORWARD);
+        servoSpecimenClaw.setDirection(Servo.Direction.FORWARD);
 
         motorFL.setPower(0);
         motorFR.setPower(0);
@@ -76,7 +81,8 @@ public class teleopMove extends LinearOpMode{
 
         waitForStart();
 
-        servoClaw.setPosition(servoPos);
+        servoSampleClaw.setPosition(servoSamplePos);
+        servoSpecimenClaw.setPosition(servoSpecimenPos);
 
         while (opModeIsActive()) {
 
@@ -110,7 +116,9 @@ public class teleopMove extends LinearOpMode{
             double[] powers = {leftFrontPower, leftBackPower, rightFrontPower, rightBackPower};
             boolean needToScale = false;
             boolean prevGamepad2ButtonA = gamepad2ButtonA;
+            boolean prevGamepad2ButtonB = gamepad2ButtonB;
             gamepad2ButtonA = gamepad2.a;
+            gamepad2ButtonB = gamepad2.b;
             for (double power : powers) {
                 if (Math.abs(power) > 1) {
                     needToScale = true;
@@ -153,21 +161,43 @@ public class teleopMove extends LinearOpMode{
                 slidePower = slidePower/3;
             }
 
-            if (gamepad2.dpad_down) {
-                servoPos -= 0.005;
-                servoPos = Math.max(servoPos, 0);
+            if (gamepad2ButtonB && !prevGamepad2ButtonB && !gamepad2.start) {
+                controlledServo = !controlledServo;
             }
-            if (gamepad2.dpad_up) {
-                servoPos += 0.005;
-                servoPos = Math.min(servoPos, 0.545);
+
+            if (!controlledServo) {
+                if (gamepad2.dpad_down) {
+                    servoSamplePos -= 0.005;
+                    servoSamplePos = Math.max(servoSamplePos, 0);
+                }
+                if (gamepad2.dpad_up) {
+                    servoSamplePos += 0.005;
+                    servoSamplePos = Math.min(servoSamplePos, 0.545);
+                }
+                if (gamepad2.dpad_right) {
+                    servoSamplePos = 0.545;
+                }
+                if (gamepad2.dpad_left) {
+                    servoSamplePos = 0;
+                }
+            } else {
+                if (gamepad2.dpad_down) {
+                    servoSpecimenPos -= 0.01;
+                    servoSpecimenPos = Math.max(servoSpecimenPos, 0.5);
+                }
+                if (gamepad2.dpad_up) {
+                    servoSpecimenPos += 0.01;
+                    servoSpecimenPos = Math.min(servoSpecimenPos, 1);
+                }
+                if (gamepad2.dpad_right) {
+                    servoSpecimenPos = 1;
+                }
+                if (gamepad2.dpad_left) {
+                    servoSpecimenPos = 0.5;
+                }
             }
-            if (gamepad2.dpad_right) {
-                servoPos = 0.545;
-            }
-            if (gamepad2.dpad_left) {
-                servoPos = 0;
-            }
-            servoClaw.setPosition(servoPos);
+            servoSampleClaw.setPosition(servoSamplePos);
+            servoSpecimenClaw.setPosition(servoSpecimenPos);
 
             motorFL.setPower(leftFrontPower);
             motorBL.setPower(leftBackPower);
@@ -175,11 +205,19 @@ public class teleopMove extends LinearOpMode{
             motorBR.setPower(rightBackPower);
 
             if (gamepad2.y) {
-                motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                telemetry.addData("Erm What the Sigma: ", "Erm WHat the Sigma");
                 motorSlide.setTargetPosition(motorSlide.getCurrentPosition());
+                motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorSlide.setPower(1);
-                gamepad2ButtonYTriggered = true;
+
+                while (gamepad2.y && opModeIsActive()) {}
+                while (!gamepad2.y && opModeIsActive()) {}
+                while (gamepad2.y && opModeIsActive()) {}
+
+                motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motorSlide.setPower(0);
             }
+            motorSlide.setPower(slidePower);
 
             if (gamepad2ButtonA & !prevGamepad2ButtonA) {
                 armPos = motorArm.getCurrentPosition();
@@ -192,17 +230,16 @@ public class teleopMove extends LinearOpMode{
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 motorArm.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
             }
-            if (!gamepad2ButtonYTriggered) {
-                motorSlide.setPower(slidePower);
-            }
 
-            telemetry.addData("Servo Position", servoClaw.getPosition());
+            telemetry.addData("Right Bumper", gamepad2.right_bumper);
+            telemetry.addData("Left Bump", gamepad2.left_bumper);
+            telemetry.addData("Controlling Servo: ", !controlledServo ? "Sample" : "Specimen");
+            telemetry.addData("Sample Servo Position", servoSampleClaw.getPosition());
+            telemetry.addData("Specimen Servo Position", servoSpecimenClaw.getPosition());
             telemetry.addData("Arm Mode", motorArm.getMode());
             telemetry.addData("Arm Position", motorArm.getCurrentPosition());
-            telemetry.addData("Arm Mode", motorSlide.getMode());
+            telemetry.addData("Slide Mode", motorSlide.getMode());
             telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
-            telemetry.addData("Gamepad2 Button A", gamepad2ButtonA);
-            telemetry.addData("Prev Gamepad2 Button A", prevGamepad2ButtonA);
             telemetry.addData("FR Motor", motorFR.getCurrentPosition());
             telemetry.addData("FL Motor", motorFL.getCurrentPosition());
             telemetry.addData("BR Motor", motorBR.getCurrentPosition());

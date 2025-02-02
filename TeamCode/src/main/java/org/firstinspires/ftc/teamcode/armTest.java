@@ -25,7 +25,7 @@ public class armTest extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoClaw");
+        servoClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
 
         motorSlide.setDirection(DcMotor.Direction.FORWARD);
         servoClaw.setDirection(Servo.Direction.FORWARD);

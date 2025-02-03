@@ -8,12 +8,11 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name="autoRight1")
-public class autoRight1 extends LinearOpMode {
+@Autonomous(name="autoRight3")
+public class autoRight3 extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor motorFL;
@@ -22,17 +21,18 @@ public class autoRight1 extends LinearOpMode {
     private DcMotor motorBL;
     private DcMotor motorArm;
     private DcMotor motorSlide;
-    private Servo servoClaw;
+    private Servo servoSampleClaw;
+    private Servo servoSpecimenClaw;
     private IMU imu;
 
-    private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime runtime = new ElapsedTime();
 
     static final double COUNTS_PER_INCH = 44.62;
-    static final double DRIVE_SPEED = 0.5;
+    static final double DRIVE_SPEED = 0.6;
     static  final double ARM_SPEED = 0.4;
     static final double SLIDE_SPEED = 0.5;
     static final double SLOW_SPEED = 0.4;
-    static final int YAW_PRECISION = 200;
+    static final int YAW_PRECISION = 20;
 
     private int idealPosMotorFL = 0;
     private int idealPosMotorFR = 0;
@@ -51,7 +51,8 @@ public class autoRight1 extends LinearOpMode {
         motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
+        servoSampleClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
+        servoSpecimenClaw = hardwareMap.get(Servo.class, "servoSpecimenClaw");
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
@@ -65,7 +66,8 @@ public class autoRight1 extends LinearOpMode {
         motorFR.setDirection(DcMotor.Direction.REVERSE);
         motorArm.setDirection(DcMotor.Direction.FORWARD);
         motorSlide.setDirection(DcMotor.Direction.FORWARD);
-        servoClaw.setDirection(Servo.Direction.FORWARD);
+        servoSampleClaw.setDirection(Servo.Direction.FORWARD);
+        servoSpecimenClaw.setDirection(Servo.Direction.FORWARD);
 
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -90,9 +92,12 @@ public class autoRight1 extends LinearOpMode {
         motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (driver presses START)
+        telemetry.addData("stuff", 0);
+        telemetry.update();
         waitForStart();
 
-        servoClaw.setPosition(0);
+        servoSampleClaw.setPosition(0);
+        servoSpecimenClaw.setPosition(0.5);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
@@ -104,9 +109,15 @@ public class autoRight1 extends LinearOpMode {
         tankDrive(DRIVE_SPEED, 35, 35, 0, YAW_PRECISION, 2);
         sideDrive(DRIVE_SPEED, 11, 1);
         tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 3);
-        tankDrive(DRIVE_SPEED, 47, 47, 0, YAW_PRECISION, 3);
-        sideDrive(DRIVE_SPEED, 10.5, 1);
-        tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 3);
+        tankDrive(DRIVE_SPEED, 20, 20, 0, YAW_PRECISION, 2);
+        tankDrive(DRIVE_SPEED, -24, -24, 0, YAW_PRECISION, 2);
+        tankDrive(DRIVE_SPEED, 10, 10, 0, YAW_PRECISION, 2);
+        servoSpecimenClaw.setPosition(1);
+        setArmPos(ARM_SPEED, 980, 3, false);
+        tankDrive(SLOW_SPEED, -8, -8, 0, YAW_PRECISION, 2);
+        servoSpecimenClaw.setPosition(0.5);
+        setSlidePos(SLIDE_SPEED, 100, 1);
+        tankDrive(DRIVE_SPEED, 10, 10, 0, YAW_PRECISION, 2);
 
 
         telemetry.addData("Path", "Complete");
@@ -162,8 +173,8 @@ public class autoRight1 extends LinearOpMode {
 
                     motorBL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
                     motorFL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorFR.setPower(Math.min(Math.abs(speed) + yawError / precision, speed));
+                    motorBR.setPower(Math.min(Math.abs(speed) + yawError / precision, speed));
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();

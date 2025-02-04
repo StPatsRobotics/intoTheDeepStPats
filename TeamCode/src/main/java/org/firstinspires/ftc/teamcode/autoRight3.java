@@ -32,7 +32,7 @@ public class autoRight3 extends LinearOpMode {
     static  final double ARM_SPEED = 0.4;
     static final double SLIDE_SPEED = 0.5;
     static final double SLOW_SPEED = 0.4;
-    static final int YAW_PRECISION = 20;
+    static final int YAW_PRECISION = 500;
 
     private int idealPosMotorFL = 0;
     private int idealPosMotorFR = 0;
@@ -96,7 +96,7 @@ public class autoRight3 extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        servoSampleClaw.setPosition(0);
+        servoSampleClaw.setPosition(0.025);
         servoSpecimenClaw.setPosition(0.5);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
@@ -109,15 +109,19 @@ public class autoRight3 extends LinearOpMode {
         tankDrive(DRIVE_SPEED, 35, 35, 0, YAW_PRECISION, 2);
         sideDrive(DRIVE_SPEED, 11, 1);
         tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 3);
-        tankDrive(DRIVE_SPEED, 20, 20, 0, YAW_PRECISION, 2);
-        tankDrive(DRIVE_SPEED, -24, -24, 0, YAW_PRECISION, 2);
+        tankDrive(DRIVE_SPEED, 17, 17, 0, YAW_PRECISION, 2);
+        tankDrive(DRIVE_SPEED, -21, -21, 0, YAW_PRECISION, 2);
+        tankDrive(SLOW_SPEED, -5, -5, 0, YAW_PRECISION, 1);
         tankDrive(DRIVE_SPEED, 10, 10, 0, YAW_PRECISION, 2);
-        servoSpecimenClaw.setPosition(1);
+        servoSpecimenClaw.setPosition(0.7);
+        sleep(100);
         setArmPos(ARM_SPEED, 980, 3, false);
-        tankDrive(SLOW_SPEED, -8, -8, 0, YAW_PRECISION, 2);
+        setSlidePos(SLIDE_SPEED, 0, 1);
+        tankDrive(0.2, -2, -2, 0, YAW_PRECISION, 2);
         servoSpecimenClaw.setPosition(0.5);
-        setSlidePos(SLIDE_SPEED, 100, 1);
-        tankDrive(DRIVE_SPEED, 10, 10, 0, YAW_PRECISION, 2);
+        sleep(500);
+        setSlidePos(SLIDE_SPEED, 400, 1);
+        tankDrive(SLOW_SPEED, 10, 10, 0, YAW_PRECISION, 2);
 
 
         telemetry.addData("Path", "Complete");
@@ -171,10 +175,10 @@ public class autoRight3 extends LinearOpMode {
                     yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
                     double yawError = Math.abs(((540 + yaw - angle) % 360) - 180);
 
-                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorFR.setPower(Math.min(Math.abs(speed) + yawError / precision, speed));
-                    motorBR.setPower(Math.min(Math.abs(speed) + yawError / precision, speed));
+                    motorBL.setPower(clamp(Math.abs(speed) + yawError / precision, 0, 1));
+                    motorFL.setPower(clamp(Math.abs(speed) - yawError / precision, 0, 1));
+                    motorFR.setPower(clamp(Math.abs(speed) + yawError / precision, 0, 1));
+                    motorBR.setPower(clamp(Math.abs(speed) - yawError / precision, 0, 1));
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();
@@ -376,5 +380,8 @@ public class autoRight3 extends LinearOpMode {
         idealPosMotorFL += motorFL.getCurrentPosition() - startPositionFL;
         idealPosMotorFR += motorFR.getCurrentPosition() - startPositionFR;
         idealPosMotorBR += motorBR.getCurrentPosition() - startPositionBR;
+    }
+    public double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(value, max));
     }
 }

@@ -228,7 +228,6 @@ public class teleopMove extends LinearOpMode{
             motorBR.setPower(rightBackPower);
 
             if (gamepad2.y) {
-                telemetry.addData("Erm What the Sigma: ", "Erm WHat the Sigma");
                 motorSlide.setTargetPosition(motorSlide.getCurrentPosition());
                 motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorSlide.setPower(1);
@@ -255,6 +254,10 @@ public class teleopMove extends LinearOpMode{
             }
 
             if (gamepad1ButtonA && !prevGamepad1ButtonA && !gamepad1.start) {
+                motorBL.setPower(0);
+                motorFL.setPower(0);
+                motorFR.setPower(0);
+                motorBR.setPower(0);
                 setSlidePos(SLIDE_SPEED, 1850, 3);
                 setArmPos(ARM_SPEED, 435, 1, true);
                 setSlidePos(0.5, 1350, 1);

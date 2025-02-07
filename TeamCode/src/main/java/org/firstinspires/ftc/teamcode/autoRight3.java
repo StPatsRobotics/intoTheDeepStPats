@@ -30,7 +30,7 @@ public class autoRight3 extends LinearOpMode {
     static final double COUNTS_PER_INCH = 44.62;
     static final double DRIVE_SPEED = 0.6;
     static  final double ARM_SPEED = 0.4;
-    static final double SLIDE_SPEED = 0.5;
+    static final double SLIDE_SPEED = 0.7;
     static final double SLOW_SPEED = 0.4;
     static final int YAW_PRECISION = 500;
 
@@ -102,9 +102,9 @@ public class autoRight3 extends LinearOpMode {
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);
         setArmPos(ARM_SPEED, 450, 1, true);
-        setSlidePos(SLIDE_SPEED, 0, 2);
+        setSlidePos(SLIDE_SPEED, 10, 2);
         tankDrive(SLOW_SPEED, -5, -5, 0, YAW_PRECISION, 1);
-        setArmPos(ARM_SPEED, 50, 2, false);
+        setArmPos(ARM_SPEED, 50, 1, false);
         sideDrive(DRIVE_SPEED, 32, 2);
         tankDrive(DRIVE_SPEED, 35, 35, 0, YAW_PRECISION, 2);
         sideDrive(DRIVE_SPEED, 11, 1);
@@ -117,11 +117,24 @@ public class autoRight3 extends LinearOpMode {
         sleep(100);
         setArmPos(ARM_SPEED, 980, 3, false);
         setSlidePos(SLIDE_SPEED, 0, 1);
-        tankDrive(0.2, -2, -2, 0, YAW_PRECISION, 2);
+        tankDrive(0.2, -1.5, -1.5, 0, YAW_PRECISION, 2);
         servoSpecimenClaw.setPosition(0.5);
         sleep(500);
         setSlidePos(SLIDE_SPEED, 400, 1);
+        setArmPos(ARM_SPEED, 370, 2, true);
         tankDrive(SLOW_SPEED, 10, 10, 0, YAW_PRECISION, 2);
+        sideDrive(DRIVE_SPEED, -55, 3);
+        turnToAngle(DRIVE_SPEED, 0, 2);
+        tankDrive(SLOW_SPEED, 18, 18, 0, YAW_PRECISION, 1);
+        setSlidePos(SLIDE_SPEED, 1850, 3);
+        setArmPos(ARM_SPEED, 435, 1, true);
+        setSlidePos(0.5, 1350, 1);
+        servoSpecimenClaw.setPosition(1);
+        setArmPos(ARM_SPEED, 370, 1, true);
+        setSlidePos(SLIDE_SPEED, 0, 2);
+        tankDrive(DRIVE_SPEED, -28, -28, 0, YAW_PRECISION, 2);
+        setArmPos(ARM_SPEED, 50, 1, false);
+        sideDrive(DRIVE_SPEED, 55, 3);
 
 
         telemetry.addData("Path", "Complete");

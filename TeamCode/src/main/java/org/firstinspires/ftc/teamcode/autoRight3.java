@@ -131,7 +131,7 @@ public class autoRight3 extends LinearOpMode {
         setSlidePos(0.5, 1350, 1);
         servoSpecimenClaw.setPosition(1);
         setArmPos(ARM_SPEED, 370, 1, true);
-        setSlidePos(SLIDE_SPEED, 0, 2);
+        setSlidePos(SLIDE_SPEED, 10, 2);
         tankDrive(DRIVE_SPEED, -28, -28, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 50, 1, false);
         sideDrive(DRIVE_SPEED, 55, 3);
@@ -320,8 +320,6 @@ public class autoRight3 extends LinearOpMode {
                 motorArm.setPower(0);
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
@@ -352,8 +350,6 @@ public class autoRight3 extends LinearOpMode {
 
             // Turn off RUN_TO_POSITION
             motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void turnToAngle(double speed, double angle, double timeoutS) {

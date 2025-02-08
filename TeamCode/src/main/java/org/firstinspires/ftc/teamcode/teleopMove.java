@@ -26,8 +26,8 @@ public class teleopMove extends LinearOpMode{
 
     static final double COUNTS_PER_INCH = 44.62;
     static final double DRIVE_SPEED = 0.6;
-    static  final double ARM_SPEED = 0.4;
-    static final double SLIDE_SPEED = 0.7;
+    static  final double ARM_SPEED = 0.6;
+    static final double SLIDE_SPEED = 1;
     static final double SLOW_SPEED = 0.4;
     static final int YAW_PRECISION = 500;
 
@@ -450,8 +450,6 @@ public class teleopMove extends LinearOpMode{
                 motorArm.setPower(0);
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
@@ -482,8 +480,6 @@ public class teleopMove extends LinearOpMode{
 
             // Turn off RUN_TO_POSITION
             motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void turnToAngle(double speed, double angle, double timeoutS) {

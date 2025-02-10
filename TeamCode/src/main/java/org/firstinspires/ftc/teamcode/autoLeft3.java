@@ -21,7 +21,8 @@ public class autoLeft3 extends LinearOpMode {
     private DcMotor motorBL;
     private DcMotor motorArm;
     private DcMotor motorSlide;
-    private Servo servoClaw;
+    private Servo servoSampleClaw;
+    private Servo servoSpecimenClaw;
     private IMU imu;
 
     private ElapsedTime     runtime = new ElapsedTime();
@@ -49,7 +50,8 @@ public class autoLeft3 extends LinearOpMode {
         motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorSlide = hardwareMap.get(DcMotor.class, "motorSlide");
-        servoClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
+        servoSampleClaw = hardwareMap.get(Servo.class, "servoSampleClaw");
+        servoSpecimenClaw = hardwareMap.get(Servo.class, "servoSpecimenClaw");
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
@@ -63,7 +65,8 @@ public class autoLeft3 extends LinearOpMode {
         motorFR.setDirection(DcMotor.Direction.REVERSE);
         motorArm.setDirection(DcMotor.Direction.FORWARD);
         motorSlide.setDirection(DcMotor.Direction.FORWARD);
-        servoClaw.setDirection(Servo.Direction.FORWARD);
+        servoSampleClaw.setDirection(Servo.Direction.FORWARD);
+        servoSpecimenClaw.setDirection(Servo.Direction.FORWARD);
 
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -90,7 +93,8 @@ public class autoLeft3 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        servoClaw.setPosition(0.025);
+        servoSampleClaw.setPosition(0.025);
+        servoSpecimenClaw.setPosition(0.5);
         tankDrive(DRIVE_SPEED,  24,  24, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2000, 3);
@@ -103,6 +107,7 @@ public class autoLeft3 extends LinearOpMode {
         sideDrive(DRIVE_SPEED, -26, 2);
         tankDrive(DRIVE_SPEED, -47, -47, 0, YAW_PRECISION, 2);
         tankDrive(DRIVE_SPEED, 50, 50, 0, YAW_PRECISION, 2);
+        sideDrive(DRIVE_SPEED, 10, 1);
         turnToAngle(0.2, 100, 2);
         setArmPos(0.25, 980, 2, false);
         sleep(500);
@@ -168,10 +173,10 @@ public class autoLeft3 extends LinearOpMode {
                     yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
                     double yawError = Math.abs(((540 + yaw - angle) % 360) - 180);
 
-                    motorBL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorFL.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorFR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
-                    motorBR.setPower(Math.min(Math.abs(speed) - yawError / precision, speed));
+                    motorBL.setPower(clamp(Math.abs(speed) + yawError / precision, 0, 1));
+                    motorFL.setPower(clamp(Math.abs(speed) - yawError / precision, 0, 1));
+                    motorFR.setPower(clamp(Math.abs(speed) + yawError / precision, 0, 1));
+                    motorBR.setPower(clamp(Math.abs(speed) - yawError / precision, 0, 1));
 
                     telemetry.addData("yawError", yawError);
                     telemetry.update();
@@ -300,8 +305,6 @@ public class autoLeft3 extends LinearOpMode {
                 motorArm.setPower(0);
                 motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void setSlidePos(double speed, int slidePos, double timeoutS) {
@@ -332,8 +335,6 @@ public class autoLeft3 extends LinearOpMode {
 
             // Turn off RUN_TO_POSITION
             motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(100);   // optional pause after each move.
         }
     }
     public void turnToAngle(double speed, double angle, double timeoutS) {
@@ -373,5 +374,8 @@ public class autoLeft3 extends LinearOpMode {
         idealPosMotorFL += motorFL.getCurrentPosition() - startPositionFL;
         idealPosMotorFR += motorFR.getCurrentPosition() - startPositionFR;
         idealPosMotorBR += motorBR.getCurrentPosition() - startPositionBR;
+    }
+    public double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(value, max));
     }
 }

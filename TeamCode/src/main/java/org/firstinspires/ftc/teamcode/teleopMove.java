@@ -26,7 +26,7 @@ public class teleopMove extends LinearOpMode{
 
     static final double COUNTS_PER_INCH = 44.62;
     static final double DRIVE_SPEED = 0.6;
-    static  final double ARM_SPEED = 0.6;
+    static  final double ARM_SPEED = 0.8;
     static final double SLIDE_SPEED = 1;
     static final double SLOW_SPEED = 0.4;
     static final int YAW_PRECISION = 500;

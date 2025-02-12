@@ -96,7 +96,7 @@ public class autoRight3 extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        servoSampleClaw.setPosition(0.025);
+        servoSampleClaw.setPosition(0.2);
         servoSpecimenClaw.setPosition(0.5);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);

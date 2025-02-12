@@ -38,8 +38,8 @@ public class teleopMove extends LinearOpMode{
     YawPitchRollAngles robotOrientation;
     double yaw;
     public double speedMode = 1;
-    public double servoSamplePos = 0.025;
-    public double servoSpecimenPos = 0.5;
+    public double servoSamplePos = 0.2;
+    public double servoSpecimenPos = 0;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
     boolean gamepad2ButtonY = false;
@@ -201,7 +201,7 @@ public class teleopMove extends LinearOpMode{
                     servoSamplePos = 0.55;
                 }
                 if (gamepad2.dpad_left) {
-                    servoSamplePos = 0.025;
+                    servoSamplePos = 0;
                 }
             } else {
                 if (gamepad2.dpad_down) {
@@ -228,6 +228,11 @@ public class teleopMove extends LinearOpMode{
             motorBR.setPower(rightBackPower);
 
             if (gamepad2.y) {
+                motorBL.setPower(0);
+                motorFL.setPower(0);
+                motorFR.setPower(0);
+                motorBR.setPower(0);
+                motorArm.setPower(0);
                 motorSlide.setTargetPosition(motorSlide.getCurrentPosition());
                 motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorSlide.setPower(1);

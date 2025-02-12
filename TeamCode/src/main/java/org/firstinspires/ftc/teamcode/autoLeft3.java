@@ -93,7 +93,7 @@ public class autoLeft3 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        servoSampleClaw.setPosition(0.025);
+        servoSampleClaw.setPosition(0.2);
         servoSpecimenClaw.setPosition(0.5);
         tankDrive(DRIVE_SPEED,  24,  24, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);

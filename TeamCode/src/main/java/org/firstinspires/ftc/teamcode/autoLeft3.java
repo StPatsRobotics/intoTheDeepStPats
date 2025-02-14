@@ -110,6 +110,7 @@ public class autoLeft3 extends LinearOpMode {
         sideDrive(DRIVE_SPEED, 10, 1);
         turnToAngle(0.2, 100, 2);
         setArmPos(0.25, 980, 2, false);
+        setSlidePos(SLIDE_SPEED, 5, 1);
         sleep(500);
         int currentArmPosition = motorArm.getCurrentPosition() - 5;
         motorFL.setPower(-0.2);
@@ -219,6 +220,18 @@ public class autoLeft3 extends LinearOpMode {
             motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             sleep(50);   // optional pause after each move.
+
+            if (motorSlide.getCurrentPosition() > 150) {
+                runtime.reset();
+                motorSlide.setPower(-1);
+
+                while (opModeIsActive() && motorSlide.getCurrentPosition() > 50 && runtime.seconds() < 0.5) {
+                    telemetry.addData("Slide Pos", motorSlide.getCurrentPosition());
+                    telemetry.update();
+                }
+
+                motorSlide.setPower(0);
+            }
         }
     }
     public void sideDrive(double speed, double sideDistance, double timeoutS) {

@@ -92,7 +92,7 @@ public class autoRight1 extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        servoClaw.setPosition(0);
+        servoClaw.setPosition(0.46);
         tankDrive(SLOW_SPEED,  23,  23, 0, YAW_PRECISION, 2);
         setArmPos(ARM_SPEED, 400, 2, true);
         setSlidePos(SLIDE_SPEED, 2200, 3);

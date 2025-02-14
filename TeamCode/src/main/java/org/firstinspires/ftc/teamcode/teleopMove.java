@@ -38,7 +38,7 @@ public class teleopMove extends LinearOpMode{
     YawPitchRollAngles robotOrientation;
     double yaw;
     public double speedMode = 1;
-    public double servoSamplePos = 0;
+    public double servoSamplePos = 0.46;
     public double servoSpecimenPos = 0;
     public int armPos = 0;
     boolean gamepad2ButtonA = false;
@@ -191,17 +191,17 @@ public class teleopMove extends LinearOpMode{
             if (!controlledServo) {
                 if (gamepad2.dpad_down) {
                     servoSamplePos -= 0.005;
-                    servoSamplePos = Math.max(servoSamplePos, 0);
+                    servoSamplePos = Math.max(servoSamplePos, 0.45);
                 }
                 if (gamepad2.dpad_up) {
                     servoSamplePos += 0.005;
-                    servoSamplePos = Math.min(servoSamplePos, 0.4);
+                    servoSamplePos = Math.min(servoSamplePos, 1);
                 }
                 if (gamepad2.dpad_right) {
-                    servoSamplePos = 0.4;
+                    servoSamplePos = 1;
                 }
                 if (gamepad2.dpad_left) {
-                    servoSamplePos = 0;
+                    servoSamplePos = 0.45;
                 }
             } else {
                 if (gamepad2.dpad_down) {
